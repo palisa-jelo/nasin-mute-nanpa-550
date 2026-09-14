@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
-public class graphAlg {
+public class DirectedGraphAlg {
     public static void main(String[] args) {
         Random random = new Random();
 
@@ -23,18 +23,18 @@ public class graphAlg {
         */
 
         DirectedGraph testBFSGraph = new DirectedGraph("[[2, 4], [], [1, 2], [3], []]");
-        printNodes(BFS(testBFSGraph, 1));
+        printNodes(SearchAlgs.BFS(testBFSGraph, 1));
         System.out.println(testBFSGraph + "\n");
         
         DirectedGraph graphOne = new DirectedGraph("[[3], [1], [4], [1, 2]]");
-        printNodes(BFS(graphOne, 1));
-        printNodes(BFS(graphOne, 1), 1, 3);
+        printNodes(SearchAlgs.BFS(graphOne, 1));
+        printNodes(SearchAlgs.BFS(graphOne, 1), 1, 3);
         
         DirectedGraph graphTwo = new DirectedGraph("[[42], [27, 32, 38, 43], [], [14, 25, 38, 42], [12, 23, 38], [21, 30, 39, 46, 47], [1, 12, 47], [23], [30, 45, 50], [8, 17, 41], [4, 6, 32, 37], [], [12, 26], [4, 25], [12, 35, 45], [24, 29], [8, 12, 21, 30], [21, 43, 50], [8, 11, 40, 50], [4, 9, 15, 21, 49], [9, 12, 27], [24], [], [11, 36], [3, 22, 32], [7, 19, 27, 47, 50], [5], [9, 31], [11, 32, 40], [2, 5, 27], [6, 14, 33], [2, 11, 13, 18, 47], [5], [2, 6, 9, 31], [9, 18], [18], [31, 35, 49], [49], [12, 30], [3, 35, 37, 47, 48], [1, 13, 19, 39], [21], [2, 37], [5, 12, 16, 18], [12], [13], [4, 6, 27, 36, 37, 44], [3], [5, 15, 25], [32, 37]]");
-        printNodes(BFS(graphTwo, 1), 1, 10);
+        printNodes(SearchAlgs.BFS(graphTwo, 1), 1, 10);
 
         DirectedGraph graphThree = new DirectedGraph("[[42], [17, 22, 28, 33], [43, 54], [8, 12, 31, 42, 57], [30, 39, 48, 55, 56, 60], [11, 46], [12], [9, 24, 29, 37, 45], [10, 23, 25, 50, 55], [], [10, 24, 52], [13, 50], [12, 23, 51, 56], [26, 30, 38, 47], [28, 50, 57], [5, 8, 37, 47, 51, 56], [2, 7, 36, 46, 49], [3, 50], [], [17, 42, 59], [18, 28, 53], [5, 12, 33, 36, 41], [35, 56], [27, 47, 55], [7, 10, 33], [1, 9, 28, 47, 56, 58], [3, 32, 40], [26, 31, 34, 56], [23, 33], [22], [25, 29, 43], [33, 46], [4, 26, 59], [1, 10, 11, 14, 26, 32, 53], [24, 55], [30, 48, 55, 59], [1, 45], [35], [16, 18, 40, 49, 50, 57], [5, 57], [7, 17], [14, 19, 47, 51], [29, 44, 58], [45], [9, 23, 56], [27, 34, 47], [7, 25], [1, 2, 5, 7, 51], [25, 43, 54], [1, 32], [4, 41], [20, 41], [33], [3, 9, 22], [3, 21], [48], [17, 19, 20, 42, 45], [29, 33, 53, 54, 57], [11, 27, 48, 53, 58], [4, 25, 26, 34, 57]]");
-        printNodes(BFS(graphThree, 1), 1, 10);
+        printNodes(SearchAlgs.BFS(graphThree, 1), 1, 10);
 
         DirectedGraph testDFSGraph = new DirectedGraph("[[2, 4], [], [1, 2], [3], []]");
         printPrePost(DFS(testDFSGraph));

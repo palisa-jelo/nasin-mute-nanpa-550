@@ -1,13 +1,12 @@
 package Structures;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Iterator;
 
-public class DirectedGraph implements Iterable<Node> {
+public class DirectedGraph implements Graph {
     private ArrayList<Set<Node>> adjacencyLists;
     private ArrayList<Node> nodes;
 
@@ -102,10 +101,12 @@ public class DirectedGraph implements Iterable<Node> {
         return getAdjacencyList(node.getValue());
     }
 
+    @Override 
     public int getN() {
         return nodes.size();
     }
 
+    @Override 
     public int getM() {
         return getEdges().size();
     }
@@ -148,6 +149,7 @@ public class DirectedGraph implements Iterable<Node> {
         return output;
     }
 
+    @Override 
     public void printEdges() {
         System.out.print("{ ");
         for(Edge edge : this.getEdges()) {
