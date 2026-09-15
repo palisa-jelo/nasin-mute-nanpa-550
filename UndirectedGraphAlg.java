@@ -57,6 +57,7 @@ public class UndirectedGraphAlg {
         Node recentNode = graph.getNode(1);
         for(int i = 0; i < graph.getN() - 1; i++) {
 
+            //Making connection public here may not be the best design choice
             for(Connection connection : graph.getAdjacentConnections(recentNode)) {
                 if(!visited.get(connection.getDestination().getValue() - 1)) {
                     Q.add(new Edge(recentNode, connection.getDestination(), connection.getWeight()));

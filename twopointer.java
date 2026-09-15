@@ -1,6 +1,6 @@
 import javax.imageio.IIOException;
 
-public class twopointer {
+public class TwoPointer {
 	public static void main(String[] args) {
 		int[] arr1 = {1, 3, 4, 5, 8, 9};
 		int[] result1 = twoSum(arr1, 8);
