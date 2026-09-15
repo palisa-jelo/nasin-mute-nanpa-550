@@ -189,6 +189,10 @@ public class UndirectedGraph implements Graph {
         return getNode(node.getValue());
     }
 
+    public ArrayList<Node> getNodes() {
+        return nodes;
+    }
+
     public Set<Node> getAdjacencyList(int i) {
         LinkedHashSet<Node> output = new LinkedHashSet<>();
         for(Connection connection : adjacencyLists.get(i - 1)) {
@@ -211,6 +215,10 @@ public class UndirectedGraph implements Graph {
             output[i] = it.next().weight;
         }
         return output;
+    }
+
+    public Set<Connection> getAdjacentConnections(Node node) {
+        return adjacencyLists.get(node.getValue() - 1);
     }
 
     @Override 
@@ -247,13 +255,21 @@ public class UndirectedGraph implements Graph {
         System.out.println(" }");
     }
 
-    private record Connection (Node node, double weight) {
-        private Connection(Node node, double weight) {
+    public record Connection (Node node, double weight) {
+        public Connection(Node node, double weight) {
             if(weight <= 0) {
                 throw new IllegalArgumentException("The weight of a connection must be greater than 0");
             }
             this.node = node;
             this.weight = weight;
+        }
+
+        public Node getDestination() {
+            return this.node;
+        }
+
+        public double getWeight() {
+            return this.weight;
         }
     }
     
