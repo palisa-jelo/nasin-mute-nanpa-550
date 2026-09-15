@@ -51,7 +51,6 @@ public class IntervalAlg {
             index++;
         }
 
-
         return outputs;
     }
 }
