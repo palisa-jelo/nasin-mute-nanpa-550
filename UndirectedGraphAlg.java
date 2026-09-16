@@ -52,7 +52,10 @@ public class UndirectedGraphAlg {
         visited.clear();
         visited.set(0);
         Edge[] mst = new Edge[graph.getN() - 1];
-        PriorityQueue<Edge> Q = new EdgePriorityQueue(graph.getN());
+        MinHashHeapSet<Edge, Node> Q = new MinHashHeapSet<Edge, Node>(
+            graph.getN(),
+            (a, b) -> (int)(a.getWeight() - b.getWeight()),
+            (a) -> (a.getDestination()));
 
         Node recentNode = graph.getNode(1);
         for(int i = 0; i < graph.getN() - 1; i++) {
@@ -74,153 +77,6 @@ public class UndirectedGraphAlg {
         }
 
         return mst;
-    }
-
-    class EdgePriorityQueue extends PriorityQueue<Edge> {
-        // For each Node, keep track of the edge in the edges[] queue 
-        HashMap<Node, PQEntry> minDistances;
-        PQEntry[] edges;
-        int size;
-
-        public EdgePriorityQueue(int n) {
-            minDistances = new HashMap<>();
-            this.edges = new PQEntry[n+1];
-            this.size = 0;
-        }
-
-        private int getLeft(int index) {
-            return 2 * index + 1;
-        }
-
-        private int getRight(int index) {
-            return 2 * index + 2;
-        }
-
-        private int getParent(int index) {
-            return (index - 1) / 2;
-        }
-
-        private void bubbleUp(int i) {
-            int parent = getParent(i);
-            if(i == 0 || parent < 0) {
-                return;
-            }
-            while(edges[i].getWeight() < edges[parent].getWeight()) {
-                swap(edges[i], edges[parent]);
-                i = parent;
-                parent = getParent(i);
-            }
-        }
-
-        private void bubbleDown(int i) {
-            int left = getLeft(i);
-            int right = getRight(i);
-            int min;
-            if(left < edges.length && edges[left] != null) {
-                if(edges[right] == null || edges[left].getWeight() < edges[right].getWeight()) {
-                    min = left;
-                } else {
-                    min = right;
-                }
-                if(edges[i].getWeight() > edges[min].getWeight()) {
-                    swap(edges[i], edges[min]);
-                    bubbleDown(min);
-                }
-            }
-        }
-
-        @Override 
-        public boolean add(Edge edge) {
-            // See if we should just override an existing entry
-            if(minDistances.containsKey(edge.getDestination())) {
-                // Only replace if it's a shorter path
-                PQEntry current = minDistances.get(edge.getDestination());
-                if(current.getWeight() > edge.getWeight()) {
-                    PQEntry newest = new PQEntry(edge, current.queueLocation);
-                    minDistances.put(edge.getDestination(), newest);
-                    edges[current.queueLocation] = newest;
-                    bubbleUp(current.queueLocation);
-                    bubbleDown(current.queueLocation);
-                }
-            } else {
-                // Insert new entry
-                // System.out.println("\n\n" + this);
-                edges[size] = new PQEntry(edge, size);
-                minDistances.put(edge.getDestination(), edges[size]);
-                try {
-                    bubbleUp(size);
-                    size++;
-                } catch (RuntimeException e) {
-                    System.out.println(e);
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        @Override 
-        public boolean offer(Edge edge) {
-            return this.add(edge);
-        }
-
-        @Override
-        public Edge peek() {
-            return edges[0] == null ? null : edges[0].edge;
-        }
-
-        public Edge poll() {
-            Edge output = edges[0].edge;
-
-            minDistances.remove(edges[0].getDestination());
-            size--;
-            swap(edges[0], edges[size]);
-            edges[size] = null;
-            bubbleDown(0);
-
-            return output;
-        }
-
-        @Override
-        public String toString() {
-            String output = "";
-            for(PQEntry entry : edges) {
-                if(entry != null) {
-                    output += (entry.edge + " | ");
-                }
-            }
-            return output;
-        }
-
-        void swap(PQEntry a, PQEntry b) {
-            PQEntry temp = b;
-            edges[b.queueLocation] = a;
-            edges[a.queueLocation] = temp;
-            int tempInt = b.queueLocation;
-            b.queueLocation = a.queueLocation;
-            a.queueLocation = tempInt;
-        }
-
-        public class PQEntry {
-            Edge edge;
-            int queueLocation;
-            
-            PQEntry(Edge edge, int loc) {
-                this.edge = edge;
-                this.queueLocation = loc;
-            }
-
-            double getWeight() {
-                return edge.getWeight();
-            }
-
-            Node getSource() {
-                return edge.getSource();
-            }
-
-            Node getDestination() {
-                return edge.getDestination();
-            }
-        }
     }
 
 
