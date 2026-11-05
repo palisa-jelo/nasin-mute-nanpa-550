@@ -4,7 +4,7 @@ import Structures.*;
 
 public class SortingAlgs {
 	public static void main(String[] args) {
-		System.out.println("Homework 1 Part 1:\n");
+		System.out.println("Homework 1 Part 2:\n");
 
 		int[] unsorted1 = {18, 73, 98, 9, 33};
 		int[] sorted1 = selectionSort(unsorted1,2);
