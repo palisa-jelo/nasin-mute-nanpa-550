@@ -1,5 +1,6 @@
 package Structures;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -8,6 +9,8 @@ import java.util.Queue;
 import java.util.function.Function;
 
 public class MinHashHeapSet<E, K> implements Queue<E> {
+    private static final int MIN_CAPACITY = 16;
+
     private E[] objects;
     private final Comparator<E> comp;
     private final Function<E, K> keyGetter;
@@ -15,7 +18,7 @@ public class MinHashHeapSet<E, K> implements Queue<E> {
     int size;
 
     public MinHashHeapSet(Comparator<E> comparator, Function<E, K> keyGetter) {
-        objects = (E[]) new Object[16];
+        objects = (E[]) new Object[MIN_CAPACITY];
         this.keyGetter = keyGetter;
         this.comp = comparator;
         map = new HashMap<>();
@@ -23,10 +26,10 @@ public class MinHashHeapSet<E, K> implements Queue<E> {
     }
 
     public MinHashHeapSet(int init, Comparator<E> comparator, Function<E, K> keyGetter) {
-        objects = (E[]) new Object[init];
+        objects = (E[]) new Object[Math.max(init, MIN_CAPACITY)];
         this.comp = comparator;
         this.keyGetter = keyGetter;
-        map = new HashMap<>(init);
+        map = new HashMap<>(Math.max(init, MIN_CAPACITY));
         size = 0;
     }
 
@@ -47,19 +50,21 @@ public class MinHashHeapSet<E, K> implements Queue<E> {
     }
 
     private void bubbleDown(int i) {
-        int left = getLeft(i);
-        int right = getRight(i);
-        int min;
-        if(left < objects.length && objects[left] != null) {
-            if(objects[right] == null || comp.compare(objects[left], objects[right]) < 0) {
+        while(true) {
+            int left = getLeft(i);
+            int right = getRight(i);
+            int min = i;
+            if(left < size && comp.compare(objects[left], objects[min]) < 0) {
                 min = left;
-            } else {
+            }
+            if(right < size && comp.compare(objects[right], objects[min]) < 0) {
                 min = right;
             }
-            if(comp.compare(objects[i], objects[min]) > 0) {
-                swap(i, min);
-                bubbleDown(min);
+            if(min == i) {
+                return;
             }
+            swap(i, min);
+            i = min;
         }
     }
 
@@ -88,7 +93,10 @@ public class MinHashHeapSet<E, K> implements Queue<E> {
         objects = Arrays.copyOf(objects, newCapacity);
     }
 
-    private void shrink(){} //NEEDS IMPLEMENTATION
+    private void shrink() {
+        int newCapacity = Math.max(size, MIN_CAPACITY);
+        objects = Arrays.copyOf(objects, newCapacity);
+    }
 
     @Override 
     public boolean add(E e) {
@@ -104,7 +112,6 @@ public class MinHashHeapSet<E, K> implements Queue<E> {
             }
         } else {
             // Insert new entry
-            // System.out.println("\n\n" + this);
             if(objects.length - size == 0) {
                 grow();
             }
@@ -138,6 +145,10 @@ public class MinHashHeapSet<E, K> implements Queue<E> {
 
     @Override 
     public E remove() {
+        if(size == 0) {
+            throw new NoSuchElementException("The MHHS is empty!");
+        }
+
         E output = objects[0];
 
         size--;
@@ -146,12 +157,28 @@ public class MinHashHeapSet<E, K> implements Queue<E> {
         objects[size] = null;
         bubbleDown(0);
 
+        if(size > 0 && (size < (objects.length >>> 2))) {
+            shrink();
+        }
+
         return output;
     }
 
     @Override
     public boolean remove(Object e) {
-        throw new UnsupportedOperationException("This method 'remove' is not implemented.");
+        if(size == 0) {
+            throw new NoSuchElementException("The MHHS is empty!");
+        }
+        if(map.containsKey(e)) {
+            int loc = map.get(e);
+            size--;
+            swap(loc, size);
+            map.remove(e);
+            objects[size] = null;
+            bubbleDown(loc);
+            return true;
+        }
+        return false;
     }
 
     @Override 
@@ -176,6 +203,9 @@ public class MinHashHeapSet<E, K> implements Queue<E> {
 
     @Override
     public boolean contains(Object e) {
+        if(size == 0) {
+            return false;
+        }
         if(!e.getClass().equals(objects[0].getClass())) {
             throw new IllegalArgumentException("The object provided cannot be present in the queue");
         }
@@ -225,18 +255,59 @@ public class MinHashHeapSet<E, K> implements Queue<E> {
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        throw new UnsupportedOperationException("This method 'removeAll' is not implemented.");
+        int j = 0;
+        for (int i = 0; i < size; i++) {
+            if (!c.contains(objects[i])) {
+                // Keep and shift
+                objects[j++] = objects[i];
+            }
+        }
+        if(j == size) {
+            return false;
+        }
+        Arrays.fill(objects, j, size, null);
+        size = j;
+        heapify();
+        if(size < (objects.length >>> 2)) {
+            shrink();
+        }
+        return true;
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("This method 'retainAll' is not implemented.");
+        int j = 0;
+        for (int i = 0; i < size; i++) {
+            if (c.contains(objects[i])) {
+                // Keep and shift
+                objects[j++] = objects[i];
+            }
+        }
+        if(j == size) {
+            return false;
+        }
+        Arrays.fill(objects, j, size, null);
+        size = j;
+        heapify();
+        if(size < (objects.length >>> 2)) {
+            shrink();
+        }
+        return true;
+    }
+
+    private void heapify() {
+        map.clear();
+        for(int i = 0; i < size; i++) {
+            map.put(getKey(objects[i]), i);
+        }
+        for(int i = (size / 2) - 1; i >= 0; i--) {
+            bubbleDown(i);
+        }
     }
 
     @Override
     public void clear() {
-        this.objects = (E[]) new Object[16];
+        this.objects = (E[]) new Object[MIN_CAPACITY];
         map.clear();
         size = 0;
     }
@@ -248,47 +319,44 @@ public class MinHashHeapSet<E, K> implements Queue<E> {
 
     class MHHSIterator implements Iterator<E> {
         private E[] heap;
-        int cursor;
         int size;
 
         MHHSIterator(E[] objects) {
             this.heap = Arrays.copyOf(objects, objects.length);
-            this.cursor = 0;
             this.size = objects.length;
         }
 
         @Override
         public boolean hasNext() {
-            return (objects[0] != null);
+            return (heap[0] != null);
         }
 
         @Override
         public E next() {
             E output = heap[0];
-            heap[0] = heap[size];
             size--;
+            heap[0] = heap[size];
             heap[size] = null;
             this.bubbleDown(0);
             return output;
         }
 
-
         private void bubbleDown(int i) {
-            int left = getLeft(i);
-            int right = getRight(i);
-            int min;
-            if(left < heap.length && heap[left] != null) {
-                if(heap[right] == null || comp.compare(heap[left], heap[right]) < 0) {
+            while(true) {
+                int left = getLeft(i);
+                int right = getRight(i);
+                int min = i;
+                if(left < size && comp.compare(heap[left], heap[right]) < 0) {
                     min = left;
-                } else {
+                }
+                if(right < size && comp.compare(heap[right], heap[min]) < 0) {
                     min = right;
                 }
-                if(comp.compare(heap[i], heap[min]) > 0) {
-                    E temp = heap[i];
-                    heap[i] = heap[min];
-                    heap[min] = temp;
-                    bubbleDown(min);
+                if(min == i) {
+                    return;
                 }
+                swap(i, min);
+                i = min;
             }
         }
     }
