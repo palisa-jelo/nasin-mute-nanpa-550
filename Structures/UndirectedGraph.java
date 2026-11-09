@@ -11,6 +11,14 @@ public class UndirectedGraph implements Graph {
     private ArrayList<Set<Connection>> adjacencyLists;
     private ArrayList<Node> nodes;
 
+    public UndirectedGraph(Graph graph) {
+        // Copy method for some kind of graph. Can be made much more efficient when copying a guaranteed Undirected Graph
+        this(graph.getN());
+        for (Edge edge : graph.getEdges()) {
+            createConnection(edge.getSource().getValue(), edge.getDestination().getValue(), edge.getWeight());
+        }
+    }
+
     public UndirectedGraph(int size) {
         adjacencyLists = new ArrayList<>();
         nodes = new ArrayList<>();
@@ -96,7 +104,7 @@ public class UndirectedGraph implements Graph {
             throw new IllegalArgumentException("Cannot connect nonexistent nodes!");
         } else {
             // We need to check if there's already a connection that needs to be removed for re-sizing
-            removeEdge(a, b);
+            removeEdge(a + 1, b + 1);
             adjacencyLists.get(a).add(new Connection(nodes.get(b), weight));
             adjacencyLists.get(b).add(new Connection(nodes.get(a), weight));
         }
@@ -112,21 +120,6 @@ public class UndirectedGraph implements Graph {
         connectNodes(a, b, weight);
     }
 
-    private void removeEdge(int a, int b) {
-        for(Connection connection : adjacencyLists.get(a)) {
-            if(connection.node.equals(nodes.get(b))) {
-                adjacencyLists.get(a).remove(connection);
-                break;
-            }
-        }
-        for(Connection connection : adjacencyLists.get(b)) {
-            if(connection.node.equals(nodes.get(a))) {
-                adjacencyLists.get(b).remove(connection);
-                break;
-            }
-        }
-    }
-
     @Override 
     public Set<Edge> getEdges() {
         Set<Edge> edges = new LinkedHashSet<>();
@@ -138,6 +131,52 @@ public class UndirectedGraph implements Graph {
             }
         }
         return edges;
+    }
+
+    public Edge getEdge(int u, int v) {
+        Set<Connection> connectedNodes = adjacencyLists.get(u - 1);
+        for(Connection connection : connectedNodes) {
+            if(connection.node.getValue() == v) {
+                return new Edge(getNode(u), connection.node, connection.weight);
+            }
+        }
+        return null;
+    }
+
+    public Edge getEdge(Node u, Node v) {
+        return getEdge(u.getValue(), v.getValue());
+    }
+
+    @Override
+    public boolean removeEdge(int u, int v) {
+        u--;
+        v--;
+        boolean removed = false;
+        for(Connection connection : adjacencyLists.get(u)) {
+            if(connection.node.equals(nodes.get(v))) {
+                adjacencyLists.get(u).remove(connection);
+                removed = true;
+                break;
+            }
+        }
+        for(Connection connection : adjacencyLists.get(v)) {
+            if(connection.node.equals(nodes.get(u))) {
+                adjacencyLists.get(v).remove(connection);
+                removed = true;
+                break;
+            }
+        }
+        return removed;
+    }
+
+    @Override
+    public boolean removeEdge(Node u, Node v) {
+        return removeEdge(u.getValue(), v.getValue());
+    }
+
+    @Override
+    public boolean removeEdge(Edge edge) {
+        return removeEdge(edge.getSource().getValue(), edge.getDestination().getValue());
     }
 
     public ArrayList<Edge> getTrimmedEdges() {

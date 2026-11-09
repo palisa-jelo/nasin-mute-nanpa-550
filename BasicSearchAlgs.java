@@ -203,6 +203,45 @@ public class BasicSearchAlgs {
         t[0]++;
     }
 
+    public static int[][] ParentPointerDFS(DirectedGraph graph) {
+        int[] pre = new int[graph.getN()];
+        int[] post = new int[graph.getN()];
+        int[] path = new int[graph.getN()];
+        int[][] output = new int[3][graph.getN()];
+        output[0] = pre;
+        output[1] = post;
+        output[2] = path;
+
+        for(int i = 0; i < pre.length; i++) {
+            pre[i] = -1;
+            post[i] = -1;
+            path[i] = -1;
+        }
+        int[] t = new int[]{1};
+        Iterator<Node> allNodes = graph.iterator();
+        while(allNodes.hasNext()) {
+            Node next = allNodes.next();
+            if(pre[next.getValue() - 1] < 0) {
+                ParentPointerExplore(graph, next, pre, post, t, path);
+            }
+        }
+
+        return output;
+    }
+
+    private static void ParentPointerExplore(DirectedGraph graph, Node node, int[] pre, int[] post, int[] t, int[] path) {
+        pre[node.getValue() - 1] = t[0];
+        t[0]++;
+        for(Node connectedNodes : graph.getAdjacencyList(node)) {
+            if(pre[connectedNodes.getValue() - 1] < 0) {
+                ParentPointerExplore(graph, connectedNodes, pre, post, t, path);
+                path[connectedNodes.getValue() - 1] = node.getValue() - 1;
+            }
+        }
+        post[node.getValue() - 1] = t[0];
+        t[0]++;
+    }
+
     public static ArrayList<Edge> getBackEdges(DirectedGraph graph) {
         ArrayList<Edge> backEdges = new ArrayList<>();
         int[][] prePost = BasicSearchAlgs.DFS(graph);

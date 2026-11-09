@@ -11,6 +11,14 @@ public class DirectedGraph implements Graph {
     private ArrayList<Node> nodes;
     private boolean isWeighted;
 
+    public DirectedGraph(Graph graph) {
+        // Copy method for some kind of graph. Can be made much more efficient when copying a guaranteed Directed Graph
+        this(graph.getN());
+        for (Edge edge : graph.getEdges()) {
+            createConnection(edge.getSource().getValue(), edge.getDestination().getValue(), edge.getWeight());
+        }
+    }
+
     public DirectedGraph(int size) {
         adjacencyLists = new ArrayList<>();
         nodes = new ArrayList<>();
@@ -95,10 +103,24 @@ public class DirectedGraph implements Graph {
             Node currentNode = nodes.get(i);
             Set<Connection> connectedNodes = adjacencyLists.get(i);
             for(Connection connection : connectedNodes) {
-                edges.add(new Edge(currentNode, connection.node));
+                edges.add(new Edge(currentNode, connection.node, connection.weight));
             }
         }
         return edges;
+    }
+
+    public Edge getEdge(int u, int v) {
+        Set<Connection> connectedNodes = adjacencyLists.get(u - 1);
+        for(Connection connection : connectedNodes) {
+            if(connection.node.getValue() == v) {
+                return new Edge(getNode(u), connection.node, connection.weight);
+            }
+        }
+        return null;
+    }
+
+    public Edge getEdge(Node u, Node v) {
+        return getEdge(u.getValue(), v.getValue());
     }
 
     public Set<Edge> getWeightedEdges() {
@@ -166,6 +188,10 @@ public class DirectedGraph implements Graph {
         return nodes.size();
     }
 
+    private ArrayList<Node> getNodes() {
+        return nodes;
+    }
+
     public Node[] getNodesArray() {
         return nodes.toArray(new Node[getN()]);
     }
@@ -230,6 +256,55 @@ public class DirectedGraph implements Graph {
             nodes.set(b - 1, new Node(b));
         }
         connectNodes(a, b);
+    }
+
+    public void editEdge(Edge edge, double change, boolean switchDirection) {
+        int a = edge.getSource().getValue();
+        int b = edge.getDestination().getValue();
+        a--;
+        b--;
+        // Check if already present
+        for(Connection connection : adjacencyLists.get(a)) {
+            if(connection.node.getValue() == b + 1) {
+                if(switchDirection) {
+                    adjacencyLists.get(a).remove(connection);
+                    adjacencyLists.get(b).add(new Connection(nodes.get(a), connection.weight + change));
+                    return;
+                }
+                adjacencyLists.get(a).remove(connection);
+                adjacencyLists.get(a).add(new Connection(nodes.get(b), connection.weight + change));
+                return;
+            }
+        }
+        // Not present
+        if(switchDirection) {
+            adjacencyLists.get(b).add(new Connection(nodes.get(a), edge.getWeight() + change));
+            return;
+        }
+        adjacencyLists.get(a).add(new Connection(nodes.get(b), edge.getWeight() + change));
+    }
+
+    @Override
+    public boolean removeEdge(int u, int v) {
+        u--;
+        v--;
+        for(Connection connection : adjacencyLists.get(u)) {
+            if(connection.node.getValue() == v + 1) {
+                adjacencyLists.get(u).remove(connection);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean removeEdge(Node u, Node v) {
+        return removeEdge(u.getValue(), v.getValue());
+    }
+
+    @Override
+    public boolean removeEdge(Edge edge) {
+        return removeEdge(edge.getSource().getValue(), edge.getDestination().getValue());
     }
 
     @Override 

@@ -1,9 +1,9 @@
 package Structures;
 
 public class Edge {
-    private Node source;
-    private Node destination;
-    private double weight;
+    private final Node source;
+    private final Node destination;
+    private final double weight;
 
     public Edge(Node source, Node destination) {
         this.source = source;
@@ -33,9 +33,13 @@ public class Edge {
         return weight;
     }
 
+    public Edge reverse() {
+        return new Edge(destination, source, weight);
+    }
+
     @Override 
     public String toString() {
-        if(weight != -1.0) {
+        if(weight != Double.MIN_VALUE) {
             return "((" + source.getValue() + ", " + destination.getValue() + "), " + weight + ")";
         } else {
             return "(" + source.getValue() + ", " + destination.getValue() + ")";
